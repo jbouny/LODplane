@@ -2,16 +2,15 @@ function LODSelection() {
 	this.nodes = new Array();
 }
 
-var LODTerrain = function( inWidth, inHeight, inLevels, inLevelResolution ) {
+var LODTerrain = function( inSize, inHeight, inLevels, inLevelResolution ) {
 	THREE.Object3D.call(this);
 
-	this.width = (inWidth !== undefined) ? inWidth : 1;
-	this.height = (inHeight !== undefined) ? inHeight : 1;
+	this.size = (inSize !== undefined) ? inSize : 1;
 	this.levels = (inLevels !== undefined) ? inLevels : 7;
 	this.levelResolution = (inLevelResolution !== undefined) ? inLevelResolution : 10;
 
 	this.root = new LODnode();
-	this.root.create( 0, 0, 50.0, this.levels );
+	this.root.create( - this.size * 0.5, - this.size * 0.5, this.size, this.levels );
 	this.selection = new LODSelection();
 }
 
@@ -141,9 +140,8 @@ var DEMO = {
 		
 		// Create LOD terrain
 		
-		this.ms_LODTerrain = new LODTerrain();
+		this.ms_LODTerrain = new LODTerrain( 50 );
 		
-		var geometry = new THREE.PlaneGeometry( 1000, 1000, 20, 20 );
 		this.ms_Material = new THREE.MeshBasicMaterial( {color: 0xffffff, wireframe: true, side: THREE.DoubleSide} );
 		this.ms_Plane = new THREE.Mesh( this.ms_LODTerrain.geometry( new THREE.Vector3( 0, 0, 0 ) ), this.ms_Material );
 		this.ms_Scene.add( this.ms_Plane );

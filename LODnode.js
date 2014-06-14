@@ -31,13 +31,18 @@ LODnode.prototype.create = function create( inX, inY, inSize, inLevel ) {
 }
 
 LODnode.prototype.intersectsSphere = function intersectsSphere( inRange, inPosition ) {
+	var xp = this.centerX;
+	var yp = this.height;
+	var zp = this.centerY;
+	
 	var distance = Math.sqrt( 
-		(inPosition.x - this.centerX) * (inPosition.x - this.centerX) +
-		(inPosition.z - this.centerY) * (inPosition.z - this.centerY) +
-		(inPosition.y - this.height) * (inPosition.y - this.height) 
+		(inPosition.x - xp) * (inPosition.x - xp) +
+		(inPosition.z - yp) * (inPosition.z - yp) +
+		(inPosition.y - zp) * (inPosition.y - zp) 
 	);
+	
 	//console.log( distance + " " + inRange );
-	return distance < inRange;
+	return ( distance - this.size * 0.5 ) < inRange;
 }
 
 LODnode.prototype.frustumIntersect = function frustumIntersect( inFrustum ) {
@@ -80,7 +85,7 @@ LODnode.prototype.select = function select( inRanges, inFrustum, inPosition, out
 				var childNode = this.childs[key];
 				if( !childNode.select( inRanges, inFrustum, inPosition, outSelection ) ) {
 					//console.log("childNode.select?");
-					outSelection.nodes.push( childNode );
+					outSelection.nodes.push( this );
 				}
 			}
 		}
