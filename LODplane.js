@@ -1,8 +1,19 @@
 function LODSelection() {
 	this.nodes = new Array();
+	this.boxes = new Array();
 }
 
-var LODTerrain = function( inSize, inHeight, inLevels, inLevelResolution ) {
+LODSelection.prototype.add = function add( inNode, inX, inY, inPart ) {
+	var box = [];
+	box[0] = (inX !== undefined) ? inX : inNode.x;
+	box[1] = (inY !== undefined) ? inY : inNode.y;
+	box[2] = (inPart !== undefined) ? inPart : false;
+	
+	this.nodes.push( inNode );
+	this.boxes.push( box );
+}
+
+var LODTerrain = function( inSize, inLevels, inLevelResolution ) {
 	THREE.Object3D.call(this);
 
 	this.size = (inSize !== undefined) ? inSize : 1;
@@ -17,7 +28,8 @@ var LODTerrain = function( inSize, inHeight, inLevels, inLevelResolution ) {
 LODTerrain.prototype.geometry = function geometry( inPosition ) {
 	this.root.select( [ 1,2,4,8,16,32,64,128,256,512 ], 0, inPosition, this.selection );
 	
-	var geo = new THREE.Geometry();
+	// THREE.Geometry version
+	/*var geo = new THREE.Geometry();
 	var nbVertices = 0;
 	for( var node in this.selection.nodes ) {
 		var lodNode = this.selection.nodes[node];
@@ -43,7 +55,70 @@ LODTerrain.prototype.geometry = function geometry( inPosition ) {
 				
 			}
 		}
+	}*/
+	
+	// THREE.BufferGeometry version
+	var geo = new THREE.BufferGeometry();
+	
+	var triangles = this.selection.nodes.length * 2 * this.levelResolution * this.levelResolution ;
+	geo.addAttribute( 'index', new THREE.Uint16Attribute( triangles * 3, 1 ) );
+	geo.addAttribute( 'position', new THREE.Float32Attribute( triangles * 3 * 3, 3 ) );
+	
+	var positions = geo.getAttribute( 'position' ).array;
+	var indices = geo.getAttribute( 'index' ).array;
+	var indexPosition = 0;
+	var indexIndices = 0;
+	var nbVertices = 0;
+	
+	for( var node in this.selection.nodes ) {
+		var lodNode = this.selection.nodes[node];
+		var lodBox = this.selection.boxes[node];
+		var resolution = lodBox[2] ? this.levelResolution  / 2 : this.levelResolution;
+		var size = lodNode.size / resolution ;
+		
+		for( var i = 0; i < resolution; ++i ) {
+		
+			var y = lodBox[1] + size * i;
+			
+			for( var j = 0; j < resolution; ++j ) {
+				var p = indexPosition;
+				var id = indexIndices;
+				var x = lodBox[0] + size * j;
+				
+				positions[p] = x;
+				positions[p+1] = y;
+				positions[p+2] = 0;
+				
+				positions[p+3] = x + size;
+				positions[p+4] = y;
+				positions[p+5] = 0;
+				
+				positions[p+6] = x + size;
+				positions[p+7] = y + size;
+				positions[p+8] = 0;
+				
+				positions[p+9] = x;
+				positions[p+10] = y + size;
+				positions[p+11] = 0;
+				
+				indices[id] = nbVertices;
+				indices[id+1] = nbVertices + 1;
+				indices[id+2] = nbVertices + 2;
+				
+				//indices[id+3] = nbVertices + 2;
+				//indices[id+4] = nbVertices + 3;
+				//indices[id+5] = nbVertices;
+						
+				nbVertices += 4;
+				indexIndices += 6;
+				indexPosition += 12;
+				
+			}
+		}
 	}
+	
+	
+	this.selection.nodes = [];
 	
 	//this.geometry.computeFaceNormals();
 	//this.geometry.computeVertexNormals();
@@ -131,6 +206,7 @@ var DEMO = {
 		
 		// Initialize Orbit control		
 		this.ms_Controls = new THREE.OrbitControls( this.ms_Camera );
+		this.ms_Controls.addEventListener( 'change', this.lodUpdate );
 		//this.ms_Controls = new THREE.OrbitControls(this.ms_Camera, this.ms_Renderer.domElement);
 	
 		// Add light
@@ -139,8 +215,7 @@ var DEMO = {
 		this.ms_Scene.add(directionalLight);
 		
 		// Create LOD terrain
-		
-		this.ms_LODTerrain = new LODTerrain( 50 );
+		this.ms_LODTerrain = new LODTerrain( 200, 7, 10 );
 		
 		this.ms_Material = new THREE.MeshBasicMaterial( {color: 0xffffff, wireframe: true, side: THREE.DoubleSide} );
 		this.ms_Plane = new THREE.Mesh( this.ms_LODTerrain.geometry( new THREE.Vector3( 0, 0, 0 ) ), this.ms_Material );
@@ -151,11 +226,13 @@ var DEMO = {
 		this.ms_Renderer.render(this.ms_Scene, this.ms_Camera);
 	},
 	
+	lodUpdate: function lodUpdate() {
+		DEMO.ms_Scene.remove( DEMO.ms_Plane );
+		DEMO.ms_Plane = new THREE.Mesh( DEMO.ms_LODTerrain.geometry( DEMO.ms_Camera.position ), DEMO.ms_Material );
+		DEMO.ms_Scene.add( DEMO.ms_Plane );
+	},
+	
 	update: function update() {
-		//this.ms_Scene.remove( this.ms_Plane );
-		//this.ms_Plane = new THREE.Mesh( this.ms_LODTerrain.geometry( this.ms_Camera.position ), this.ms_Material );
-		//this.ms_Scene.add( this.ms_Plane );
-		
 		this.display();
 	},
 	

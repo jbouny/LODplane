@@ -67,7 +67,7 @@ LODnode.prototype.select = function select( inRanges, inFrustum, inPosition, out
 	if( 0 === this.level ) {
 		// We are in our LOD range and we are the last LOD level 
 		//console.log("0 === this.level");
-		outSelection.nodes.push( this );
+		outSelection.add( this );
 		return true;
 	}
 	else {
@@ -85,7 +85,7 @@ LODnode.prototype.select = function select( inRanges, inFrustum, inPosition, out
 				var childNode = this.childs[key];
 				if( !childNode.select( inRanges, inFrustum, inPosition, outSelection ) ) {
 					//console.log("childNode.select?");
-					outSelection.nodes.push( this );
+					outSelection.add( this, childNode.x, childNode.y, true );
 				}
 			}
 		}
