@@ -73,7 +73,7 @@ var DEMO = {
 		this.ms_Scene = new THREE.Scene();
 		
 		this.ms_Camera = new THREE.PerspectiveCamera( 55.0, WINDOW.ms_Width / WINDOW.ms_Height, 0.001, 3000000 );
-		this.ms_Camera.position.set( 0, 0, -200 );
+		this.ms_Camera.position.set( 0, 50, -200 );
 		this.ms_Camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 		
 		// Initialize Orbit control		
@@ -81,8 +81,25 @@ var DEMO = {
 		this.ms_Controls.addEventListener( 'change', this.lodUpdate );
 		
 		// Create LOD terrain
-		this.ms_LODTerrain = new LOD.Plane( 200, 7, 16 );
-		this.ms_Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.VertexColors, wireframe: true, side: THREE.DoubleSide} );
+		this.ms_LODTerrain = new LOD.Plane( 200, 6, 32 );
+		//this.ms_Material = new THREE.MeshBasicMaterial( {vertexColors: THREE.VertexColors, wireframe: true, side: THREE.DoubleSide} );
+
+		this.ms_Material = new THREE.RawShaderMaterial( {
+
+			uniforms: {
+				time: { type: "f", value: 1.0 }
+			},
+			vertexShader: document.getElementById( 'vertexShader' ).textContent,
+			fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+			side: THREE.DoubleSide,
+			transparent: true
+
+		} );
+		
+		this.ms_Plane = new THREE.Mesh( this.ms_LODTerrain.geometry( this.ms_Camera.position ), this.ms_Material );
+		this.ms_Scene.add( this.ms_Plane );
+
+		
 		this.lodUpdate();
 	},
 
@@ -91,12 +108,18 @@ var DEMO = {
 	},
 	
 	lodUpdate: function lodUpdate() {
-		DEMO.ms_Scene.remove( DEMO.ms_Plane );
-		DEMO.ms_Plane = new THREE.Mesh( DEMO.ms_LODTerrain.geometry( DEMO.ms_Camera.position ), DEMO.ms_Material );
-		DEMO.ms_Scene.add( DEMO.ms_Plane );
+		var geometry = DEMO.ms_LODTerrain.geometry( DEMO.ms_Camera.position );
+		if( geometry !== DEMO.ms_Plane.geometry ) {
+			DEMO.ms_Scene.remove( DEMO.ms_Plane );
+			DEMO.ms_Plane = new THREE.Mesh( DEMO.ms_LODTerrain.geometry( DEMO.ms_Camera.position ), DEMO.ms_Material );
+			DEMO.ms_Scene.add( DEMO.ms_Plane );
+		}
 	},
 	
 	update: function update() {
+		var time = performance.now();
+		this.ms_Material.uniforms.time.value = time * 0.005 ;
+		
 		this.display();
 	},
 	
