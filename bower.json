@@ -4,6 +4,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"three.js": "https://raw.github.com/mrdoob/three.js/master/build/three.min.js",
+		"ocean": "https://raw.github.com/jbouny/ocean/master/water-material.js",
 		"OrbitControl": "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js",
 		"zepto": "latest"
 	}

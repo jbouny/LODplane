@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>CDLOD Plane - Jérémy BOUNY</title>
+		<link href="style.css" rel="stylesheet">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	</head>
+
+	<body>	
+		<div id="canvas-3d" class="viewer"></div>
+		
+		<script id="vertexShader" type="x-shader/x-vertex">
+
+			precision mediump float;
+			precision mediump int;
+
+			uniform float time;
+
+			uniform mat4 modelViewMatrix; // optional
+			uniform mat4 projectionMatrix; // optional
+
+			attribute vec3 position;
+			attribute vec4 color;
+
+			varying vec3 vPosition;
+			varying vec4 vColor;
+
+			void main()	{
+
+				vPosition = position;
+				vColor = color;
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+				gl_Position.y += sin( vPosition.x * 0.3565 + time * 0.1 ) * 2.0 + cos( vPosition.z * 0.265 + time * 0.1 ) * 2.0;
+
+			}
+
+		</script>
+
+		<script id="fragmentShader" type="x-shader/x-fragment">
+
+			precision mediump float;
+			precision mediump int;
+
+			uniform float time;
+
+			varying vec3 vPosition;
+			varying vec4 vColor;
+
+			void main()	{
+
+				vec4 color = vec4( vColor );
+				float height = sin( vPosition.x * 0.3565 + time * 0.1 ) * 0.25 + cos( vPosition.z * 0.265 + time * 0.1 ) * 0.25;
+				color += height;
+
+				gl_FragColor = color;
+
+			}
+
+		</script>
+		
+		<!-- External libraries -->	
+		<script src="../../libs/three.js/index.js"></script>
+		<script src="../../libs/OrbitControl/index.js"></script>
+		<script src="../../libs/ocean/index.js"></script>
+		<script src="../../libs/zepto/zepto.min.js"></script>
+		
+		<!-- Demo files -->
+		<script src="../../LODPlane.js"></script>
+		<script src="demo.js"></script>
+	</body>
+</html>

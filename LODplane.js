@@ -259,13 +259,13 @@ LOD.Plane.prototype.geometry = function geometry( inPosition ) {
 					positions[idP+11] = y + size;
 					
 					// Manage indices
-					indices[idI] = nbVertices;
+					indices[idI] = nbVertices + 2;
 					indices[idI+1] = nbVertices + 1;
-					indices[idI+2] = nbVertices + 2;
+					indices[idI+2] = nbVertices;
 					
-					indices[idI+3] = nbVertices + 2;
+					indices[idI+3] = nbVertices;
 					indices[idI+4] = nbVertices + 3;
-					indices[idI+5] = nbVertices;
+					indices[idI+5] = nbVertices + 2;
 					
 					// Manage colors
 					var color = ( ( i % 2 + j % 2 ) == 1 ) ? this.tilesColors[nodeLevel] : this.tilesColorsDark[nodeLevel] ;
